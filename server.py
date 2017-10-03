@@ -7,7 +7,14 @@ def server():
     s.bind(("127.0.0.1", 8080))
     s.listen(1)
     sock, client = s.accept()
-    data = sock.recv(1024)
+    data = sock.recv(1048576)
+
     sock.close()
     s.close()
-    print(data)
+
+    #  to see data on the terminal printing it by uncomment this
+    # print(data)
+
+    #  receiving a file from client / remove utorrent.png from resources before testing
+    with open('tests/resources/utorrent.png', 'wb') as image_file:
+        image_file.write(data)

@@ -1,6 +1,9 @@
+from server import server
+
 
 def main():
-    print('Hello world')
+    #  testing server-client connection works
+    server()
 
 
 if __name__ == "__main__":
