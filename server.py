@@ -1,20 +1,44 @@
-import socket
+import asyncio
 
 
-#  test connection between client and server on port 8080
 def server():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.bind(("127.0.0.1", 8080))
-    s.listen(1)
-    sock, client = s.accept()
-    data = sock.recv(1048576)
+    loop = asyncio.get_event_loop()
+    f = asyncio.start_server(handle_client, host='127.0.0.1', port=2991, loop=loop)
+    run_server = loop.run_until_complete(f)
 
-    sock.close()
-    s.close()
+    # Serve requests until Ctrl+C is pressed
+    print('Serving on {}'.format(run_server.sockets[0].getsockname()))
 
-    #  to see data on the terminal printing it by uncomment this
-    # print(data)
+    try:
+        loop.run_forever()
+    except KeyboardInterrupt:
+        pass
 
-    #  receiving a file from client / remove utorrent.png from resources before testing
-    with open('tests/resources/utorrent.png', 'wb') as image_file:
-        image_file.write(data)
+    # Close the server
+    run_server.close()
+    loop.run_until_complete(run_server.wait_closed())
+    loop.close()
+
+
+@asyncio.coroutine
+def handle_client(client_reader, client_writer):
+    # let the client know they are connected
+    print("Send: Connection established")
+    client_writer.write("Connection established".encode())
+
+    # give client a chance to respond, timeout after 10 seconds
+    data = yield from asyncio.wait_for(client_reader.read(1000), timeout=10.0)
+
+    message = data.decode()
+    address = client_writer.get_extra_info('peername')
+    print("Received {} from {}".format(message, address))
+
+    # schedule the write operation and flush the buffer
+    yield from client_writer.drain()
+
+    print("Close the client socket")
+    client_writer.close()
+
+
+if __name__ == '__main__':
+    server()
