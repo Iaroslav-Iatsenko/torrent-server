@@ -1,9 +1,10 @@
-from server import server
+from server import SimpleTorrentServer
 
 
 def main():
     #  testing server-client connection works
-    server()
+    server = SimpleTorrentServer()
+    server.fulfill()
 
 
 if __name__ == "__main__":
