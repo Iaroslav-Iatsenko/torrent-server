@@ -4,7 +4,7 @@ from server import SimpleTorrentServer
 def main():
     #  testing server-client connection works
     server = SimpleTorrentServer()
-    server.fulfill()
+    server.run()
 
 
 if __name__ == "__main__":
