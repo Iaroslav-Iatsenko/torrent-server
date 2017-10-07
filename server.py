@@ -1,25 +1,6 @@
 import asyncio
 
 
-def server():
-    loop = asyncio.get_event_loop()
-    f = asyncio.start_server(handle_client, host='127.0.0.1', port=2991, loop=loop)
-    run_server = loop.run_until_complete(f)
-
-    # Serve requests until Ctrl+C is pressed
-    print('Serving on {}'.format(run_server.sockets[0].getsockname()))
-
-    try:
-        loop.run_forever()
-    except KeyboardInterrupt:
-        pass
-
-    # Close the server
-    run_server.close()
-    loop.run_until_complete(run_server.wait_closed())
-    loop.close()
-
-
 @asyncio.coroutine
 def handle_client(client_reader, client_writer):
     # let the client know they are connected
@@ -40,5 +21,29 @@ def handle_client(client_reader, client_writer):
     client_writer.close()
 
 
-if __name__ == '__main__':
-    server()
+class SimpleTorrentServer:
+    def __init__(self, host='127.0.0.1', port=2991):
+        self.host = host
+        self.port = port
+        self.loop = asyncio.get_event_loop()
+        f = asyncio.start_server(
+            handle_client, host=self.host, port=self.port, loop=self.loop
+        )
+        self.run_server = self.loop.run_until_complete(f)
+
+    def run(self):
+        # Serve requests until Ctrl+C is pressed
+        print('Serving on {}'.format(self.run_server.sockets[0].getsockname()))
+
+        try:
+            self.loop.run_forever()
+        except KeyboardInterrupt:
+            print('\nServer stopped')
+        finally:
+            self.stop()
+
+    def stop(self):
+        # Close the server
+        self.run_server.close()
+        self.loop.run_until_complete(self.run_server.wait_closed())
+        self.loop.close()
