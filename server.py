@@ -46,9 +46,4 @@ class SimpleTorrentServer:
         # Close the server
         self.run_server.close()
         self.loop.run_until_complete(self.run_server.wait_closed())
-        self.loop.close()
-        
-
-    
-    
-        
+self.loop.close()
